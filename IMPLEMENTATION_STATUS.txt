@@ -1,0 +1,14 @@
+Prepared locally:
+- React/Vite frontend source
+- Google Apps Script read-only JSONP API
+- Google Sheets XLSX template (PROFILE + ACTIONS)
+- QR code PNG and SVG for https://card.codelessai.in/
+
+Not yet completed externally:
+- Native Google Sheet creation in your Google account
+- Apps Script deployment and authorization
+- DNS and hosting configuration for card.codelessai.in
+- Live API testing and live QR scan test
+- Insertion of the final QR asset into the Canva card design
+
+Before printing, deploy the app and verify the QR destination works over HTTPS.
