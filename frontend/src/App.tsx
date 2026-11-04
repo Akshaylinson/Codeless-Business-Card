@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Globe, Contact, MessageCircle, Mail,
-  Phone, ExternalLink, ArrowUpRight, RefreshCw, Building2, MapPin, Link
+  Phone, ExternalLink, ArrowUpRight, RefreshCw, MapPin, Link
 } from 'lucide-react';
 
 type Profile = Record<string, string>;
@@ -164,13 +164,12 @@ export default function App() {
   return (
     <main className="shell">
       <section className="card">
-        <div className="topline"><span className="brand-mark">C</span><span className="brand-name">CODELESS <b>TECHNOLOGIES</b></span></div>
+        <div className="topline">
+          <span className="brand-wordmark">CODELESS <b>TECHNOLOGIES</b></span>
+        </div>
         <div className="profile">
-          {p.profile_image && safeHttpUrl(p.profile_image) ? <img className="avatar" src={safeHttpUrl(p.profile_image)!} alt="Profile" /> : <div className="avatar avatar-fallback"><Building2 size={28}/></div>}
           <p className="eyebrow">AI & SOFTWARE SOLUTIONS</p>
-          <h1>{p.full_name || 'Codeless Technologies'}</h1>
-          {p.designation && <p className="role">{p.designation}</p>}
-          <p className="company">{p.company_name || 'Codeless Technologies'}</p>
+          <h1>{p.company_name || 'Codeless Technologies'}</h1>
           {p.tagline && <p className="tagline">{p.tagline}</p>}
           {p.address && <p className="address"><MapPin size={14}/>{p.address}</p>}
         </div>
