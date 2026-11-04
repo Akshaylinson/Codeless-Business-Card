@@ -18,7 +18,18 @@ button { font: inherit; }
   align-items: flex-start;
   justify-content: center;
   padding: 0;
-  background: #f0f0ee;
+  background-color: #f0f0ee;
+  background-image:
+    /* dot mesh */
+    radial-gradient(circle, #c8c8c6 1px, transparent 1px),
+    /* top-left glow */
+    radial-gradient(ellipse 55% 40% at 0% 0%, rgba(180,180,178,0.35) 0%, transparent 70%),
+    /* bottom-right glow */
+    radial-gradient(ellipse 50% 45% at 100% 100%, rgba(170,170,168,0.28) 0%, transparent 70%),
+    /* center vignette lift */
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,255,255,0.55) 0%, transparent 75%);
+  background-size: 22px 22px, 100% 100%, 100% 100%, 100% 100%;
+  background-position: 0 0, 0 0, 0 0, 0 0;
 }
 
 /* ── Card — mobile: full width, no border-radius ── */
@@ -225,7 +236,13 @@ h1 {
     align-items: center;
     justify-content: center;
     padding: 40px 32px;
-    background: radial-gradient(ellipse at 50% 0%, #fff 0%, #ebebea 70%);
+    background-color: #efefed;
+    background-image:
+      radial-gradient(circle, #c4c4c2 1px, transparent 1px),
+      radial-gradient(ellipse 45% 55% at 0% 0%, rgba(175,175,173,0.32) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 50% at 100% 100%, rgba(165,165,163,0.25) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 55% at 50% 50%, rgba(255,255,255,0.6) 0%, transparent 70%);
+    background-size: 24px 24px, 100% 100%, 100% 100%, 100% 100%;
     min-height: 100vh;
   }
 
