@@ -17,24 +17,32 @@ const CACHE_KEY = 'codeless_card_v1';
 const CACHE_TTL_MS = 60_000;
 const WA_GREETING = encodeURIComponent("Hello, I found your contact through your digital business card. I'd like to know more about Codeless Technologies.");
 
-function jsonp(url: string): Promise<CardData> {
+function jsonp(url: string, attempt = 0): Promise<CardData> {
   return new Promise((resolve, reject) => {
     if (!url) return reject(new Error('Card API is not configured.'));
     const callbackName = `__codelessCard_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const script = document.createElement('script');
-    const timeout = window.setTimeout(() => cleanup(new Error('The card service took too long to respond.')), 12000);
+    const timeout = window.setTimeout(() => cleanup(new Error('timeout')), 25000);
     const cleanup = (error?: Error, data?: CardData) => {
       window.clearTimeout(timeout);
       delete (window as any)[callbackName];
       script.remove();
-      if (error) reject(error);
-      else if (data?.success) resolve(data);
+      if (error) {
+        if (attempt < 2) {
+          // silent retry after a short back-off
+          window.setTimeout(() => jsonp(url, attempt + 1).then(resolve).catch(reject), 1500 * (attempt + 1));
+        } else {
+          reject(new Error('Could not connect to the card service.'));
+        }
+        return;
+      }
+      if (data?.success) resolve(data);
       else reject(new Error(data?.error || 'Unable to load card details.'));
     };
     (window as any)[callbackName] = (data: CardData) => cleanup(undefined, data);
-    script.onerror = () => cleanup(new Error('Could not connect to the card service.'));
+    script.onerror = () => cleanup(new Error('onerror'));
     const separator = url.includes('?') ? '&' : '?';
-    script.src = `${url}${separator}callback=${callbackName}&_=${Date.now()}`;
+    script.src = `${url}${separator}callback=${callbackName}&_=${Date.now()}&attempt=${attempt}`;
     document.body.appendChild(script);
   });
 }
@@ -101,21 +109,24 @@ export default function App() {
   const [data, setData] = useState<CardData | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [retrying, setRetrying] = useState(false);
 
-  const load = async () => {
-    setLoading(true); setError('');
+  const load = async (isRetry = false) => {
+    setLoading(true); setError(''); if (isRetry) setRetrying(true);
     try {
-      const cached = sessionStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const { ts, payload } = JSON.parse(cached);
-        if (Date.now() - ts < CACHE_TTL_MS) { setData(payload); setLoading(false); return; }
+      if (!isRetry) {
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { ts, payload } = JSON.parse(cached);
+          if (Date.now() - ts < CACHE_TTL_MS) { setData(payload); setLoading(false); setRetrying(false); return; }
+        }
       }
       const payload = await jsonp(API_URL);
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), payload }));
       setData(payload);
     }
     catch (e) { setError(e instanceof Error ? e.message : 'Unable to load card.'); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setRetrying(false); }
   };
 
   useEffect(() => { load(); }, []);
@@ -153,7 +164,7 @@ export default function App() {
 
   if (loading) return (
     <main className="shell">
-      <div className="state"><div className="spinner" /><p>Loading…</p></div>
+      <div className="state"><div className="spinner" /><p>{retrying ? 'Retrying…' : 'Loading…'}</p></div>
     </main>
   );
   if (error || !data) return (
@@ -162,7 +173,7 @@ export default function App() {
         <div className="state-mark">C</div>
         <h1>Card temporarily unavailable</h1>
         <p>{error || 'Please try again.'}</p>
-        <button className="retry" onClick={load}><RefreshCw size={16} /> Try again</button>
+        <button className="retry" onClick={() => load(true)}><RefreshCw size={16} /> Try again</button>
       </div>
     </main>
   );
