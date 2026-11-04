@@ -231,9 +231,11 @@ export default function App() {
             {p.tagline && <p className="tagline">{p.tagline}</p>}
             {p.address && <p className="address"><MapPin size={13} />{p.address}</p>}
 
-            {/* Description — desktop only */}
+            {/* Description lead — always visible */}
+            <p className="about-lead">AI driven technology company building intelligent software solutions, innovative SaaS products, and business automation systems.</p>
+
+            {/* Pillars + Mission/Vision — desktop only */}
             <div className="about">
-              <p className="about-lead">AI driven technology company building intelligent software solutions, innovative SaaS products, and business automation systems.</p>
               <ul className="about-pillars">
                 <li><Cpu size={14} /><span>Custom AI &amp; Software Development</span></li>
                 <li><Zap size={14} /><span>Business Process Automation</span></li>
