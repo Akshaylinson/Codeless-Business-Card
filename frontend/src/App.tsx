@@ -229,7 +229,7 @@ export default function App() {
 
         {/* Header — shared */}
         <header className="card-header">
-          <span className="brand-wordmark">CODELESS <b>TECHNOLOGIES</b></span>
+          <span className="brand-wordmark">DIGITAL BUSINESS CARD</span>
         </header>
 
         {/* Body — single col on mobile, two col on desktop */}
