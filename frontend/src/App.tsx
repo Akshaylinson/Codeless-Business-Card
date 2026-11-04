@@ -174,7 +174,14 @@ export default function App() {
   const whatsappNumber = whatsappDigits(whatsapp);
 
   const actionsPanel = (
-    <div className="actions-panel">
+    <div className="actions-panel" ref={(el) => {
+      if (!el) return;
+      const update = () => el.classList.toggle('has-overflow', el.scrollHeight > el.clientHeight + 4);
+      update();
+      const ro = new ResizeObserver(update);
+      ro.observe(el);
+      el.addEventListener('scroll', update, { passive: true });
+    }}>
       <div className="primary-actions">
         {reservedEnabled('website') && validWebsite && (
           <button className="action primary" onClick={() => window.open(validWebsite, '_blank', 'noopener,noreferrer')}>
@@ -226,7 +233,7 @@ export default function App() {
 
             {/* Description — desktop only */}
             <div className="about">
-              <p className="about-lead">AI-driven technology company building intelligent software solutions, innovative SaaS products, and business automation systems.</p>
+              <p className="about-lead">AI driven technology company building intelligent software solutions, innovative SaaS products, and business automation systems.</p>
               <ul className="about-pillars">
                 <li><Cpu size={14} /><span>Custom AI &amp; Software Development</span></li>
                 <li><Zap size={14} /><span>Business Process Automation</span></li>
@@ -235,7 +242,7 @@ export default function App() {
               <div className="about-mv">
                 <div>
                   <strong>Mission</strong>
-                  <p>Make intelligent technology accessible and practical — helping businesses innovate, automate, and grow.</p>
+                  <p>Make intelligent technology accessible and practical, helping businesses innovate, automate, and grow.</p>
                 </div>
                 <div>
                   <strong>Vision</strong>

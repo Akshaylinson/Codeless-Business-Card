@@ -89,7 +89,16 @@ h1 {
 .about { display: none; }
 
 /* ── Actions panel ── */
-.actions-panel { display: flex; flex-direction: column; gap: 0; }
+.actions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE/Edge */
+  position: relative;
+}
+.actions-panel::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 .primary-actions { display: grid; gap: 10px; }
 .more-actions { margin-top: 20px; display: grid; gap: 10px; }
 .section-label {
@@ -129,9 +138,25 @@ h1 {
 .secondary { background: #fff; border-color: #e5e5e3; color: #111; }
 .secondary:hover { background: #f7f7f5; }
 
-/* ── Desktop actions column hidden on mobile ── */
-.actions-desktop { display: none; }
-.actions-mobile { display: block; }
+/* Scroll-hint fade — only shown when content overflows */
+.actions-desktop {
+  display: none;
+  position: relative;
+}
+.actions-desktop::after {
+  content: '';
+  position: absolute;
+  bottom: 36px; /* matches padding */
+  left: 36px;
+  right: 0;
+  height: 56px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.95));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 0 0 0 0;
+}
+.actions-desktop:has(.actions-panel.has-overflow)::after { opacity: 1; }
 
 /* ── Footer ── */
 .card-footer {
@@ -299,7 +324,16 @@ h1 {
     flex-direction: column;
     justify-content: center;
     padding: 36px 36px;
+    overflow: hidden; /* clip the fade */
   }
+  .actions-desktop .actions-panel {
+    max-height: 420px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 8px;
+  }
+  .actions-desktop .actions-panel::-webkit-scrollbar { display: none; }
 
   .card-footer {
     padding: 18px 36px;
