@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output
+frontend/dist/
+frontend/.tsbuildinfo
+frontend/tsconfig.node.tsbuildinfo
+frontend/vite.config.d.ts
+frontend/vite.config.js
+
+# Environment — NEVER commit real API URLs or secrets
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
