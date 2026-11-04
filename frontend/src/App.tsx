@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Globe, Contact, MessageCircle, Mail,
-  Phone, ExternalLink, ArrowUpRight, RefreshCw, MapPin, Link
+  Phone, ExternalLink, ArrowUpRight, RefreshCw, MapPin, Link, Cpu, Zap, Target
 } from 'lucide-react';
 
 type Profile = Record<string, string>;
@@ -52,7 +52,6 @@ function phoneDigits(value: string): string {
 
 function whatsappDigits(value: string): string {
   let digits = phoneDigits(value);
-  // Indian mobile numbers may be entered as 10 digits or with a leading 0.
   if (digits.length === 10) digits = `91${digits}`;
   else if (digits.length === 11 && digits.startsWith('0')) digits = `91${digits.slice(1)}`;
   return digits;
@@ -72,7 +71,7 @@ function downloadVCard(profile: Profile) {
   ];
   if (profile.phone) lines.push(`TEL;TYPE=CELL:${escapeVCard(profile.phone)}`);
   if (profile.email) lines.push(`EMAIL;TYPE=INTERNET:${escapeVCard(profile.email)}`);
-  if (profile.website && safeHttpUrl(profile.website)) lines.push(`URL:${safeHttpUrl(profile.website)}`);
+  if (profile.website && safeHttpUrl(profile.website)) lines.push(`URL:${safeHttpUrl(profile.website)!}`);
   if (profile.address) lines.push(`ADR;TYPE=WORK:;;${escapeVCard(profile.address)};;;;`);
   lines.push('END:VCARD');
   const blob = new Blob([lines.join('\r\n') + '\r\n'], { type: 'text/vcard;charset=utf-8' });
@@ -152,8 +151,21 @@ export default function App() {
     if (target) window.open(target, '_blank', 'noopener,noreferrer');
   };
 
-  if (loading) return <main className="shell"><div className="state"><div className="spinner" /><p>Loading digital business card…</p></div></main>;
-  if (error || !data) return <main className="shell"><div className="state"><div className="brand-mark">C</div><h1>Card temporarily unavailable</h1><p>{error || 'Please try again.'}</p><button className="retry" onClick={load}><RefreshCw size={16}/> Try again</button></div></main>;
+  if (loading) return (
+    <main className="shell">
+      <div className="state"><div className="spinner" /><p>Loading…</p></div>
+    </main>
+  );
+  if (error || !data) return (
+    <main className="shell">
+      <div className="state">
+        <div className="state-mark">C</div>
+        <h1>Card temporarily unavailable</h1>
+        <p>{error || 'Please try again.'}</p>
+        <button className="retry" onClick={load}><RefreshCw size={16} /> Try again</button>
+      </div>
+    </main>
+  );
 
   const p = data.profile || {};
   const website = p.website || actions.find(a => a.key === 'website')?.value || '';
@@ -161,30 +173,93 @@ export default function App() {
   const validWebsite = safeHttpUrl(website);
   const whatsappNumber = whatsappDigits(whatsapp);
 
+  const actionsPanel = (
+    <div className="actions-panel">
+      <div className="primary-actions">
+        {reservedEnabled('website') && validWebsite && (
+          <button className="action primary" onClick={() => window.open(validWebsite, '_blank', 'noopener,noreferrer')}>
+            <Globe /><span>Visit Website</span><ArrowUpRight className="end-icon" />
+          </button>
+        )}
+        {reservedEnabled('save_contact') && (
+          <button className="action primary" onClick={() => downloadVCard(p)}>
+            <Contact /><span>Save Contact</span><ArrowUpRight className="end-icon" />
+          </button>
+        )}
+        {reservedEnabled('whatsapp') && whatsappNumber && (
+          <button className="action whatsapp" onClick={() => window.open(`https://wa.me/${whatsappNumber}?text=${WA_GREETING}`, '_blank', 'noopener,noreferrer')}>
+            <MessageCircle /><span>Connect on WhatsApp</span><ArrowUpRight className="end-icon" />
+          </button>
+        )}
+      </div>
+      {optionalActions.length > 0 && (
+        <div className="more-actions">
+          <p className="section-label">CONNECT &amp; EXPLORE</p>
+          {optionalActions.map(a => (
+            <button key={a.key} className="action secondary" onClick={() => openAction(a)}>
+              {actionIcon(a.type)}<span>{a.label}</span><ArrowUpRight className="end-icon" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <main className="shell">
-      <section className="card">
-        <div className="topline">
+      <div className="card">
+
+        {/* Header — shared */}
+        <header className="card-header">
           <span className="brand-wordmark">CODELESS <b>TECHNOLOGIES</b></span>
-        </div>
-        <div className="profile">
-          <p className="eyebrow">AI & SOFTWARE SOLUTIONS</p>
-          <h1>{p.company_name || 'Codeless Technologies'}</h1>
-          {p.tagline && <p className="tagline">{p.tagline}</p>}
-          {p.address && <p className="address"><MapPin size={14}/>{p.address}</p>}
+        </header>
+
+        {/* Body — single col on mobile, two col on desktop */}
+        <div className="card-body">
+
+          {/* Left / top: company info */}
+          <div className="info-panel">
+            <p className="eyebrow">AI &amp; SOFTWARE SOLUTIONS</p>
+            <h1>{p.company_name || 'Codeless Technologies'}</h1>
+            {p.tagline && <p className="tagline">{p.tagline}</p>}
+            {p.address && <p className="address"><MapPin size={13} />{p.address}</p>}
+
+            {/* Description — desktop only */}
+            <div className="about">
+              <p className="about-lead">AI-driven technology company building intelligent software solutions, innovative SaaS products, and business automation systems.</p>
+              <ul className="about-pillars">
+                <li><Cpu size={14} /><span>Custom AI &amp; Software Development</span></li>
+                <li><Zap size={14} /><span>Business Process Automation</span></li>
+                <li><Target size={14} /><span>Scalable SaaS Products</span></li>
+              </ul>
+              <div className="about-mv">
+                <div>
+                  <strong>Mission</strong>
+                  <p>Make intelligent technology accessible and practical — helping businesses innovate, automate, and grow.</p>
+                </div>
+                <div>
+                  <strong>Vision</strong>
+                  <p>Become a technology partner for businesses worldwide, driving innovation through AI and intelligent automation.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions — mobile only (inside info panel) */}
+            <div className="actions-mobile">{actionsPanel}</div>
+          </div>
+
+          {/* Right: actions — desktop only */}
+          <div className="actions-desktop">{actionsPanel}</div>
+
         </div>
 
-        <div className="primary-actions">
-          {reservedEnabled('website') && validWebsite && <button className="action primary" onClick={() => window.open(validWebsite, '_blank', 'noopener,noreferrer')}><Globe/><span>Visit Website</span><ArrowUpRight className="end-icon"/></button>}
-          {reservedEnabled('save_contact') && <button className="action primary" onClick={() => downloadVCard(p)}><Contact/><span>Save Contact</span><ArrowUpRight className="end-icon"/></button>}
-          {reservedEnabled('whatsapp') && whatsappNumber && <button className="action whatsapp" onClick={() => window.open(`https://wa.me/${whatsappNumber}?text=${WA_GREETING}`, '_blank', 'noopener,noreferrer')}><MessageCircle/><span>Connect on WhatsApp</span><ArrowUpRight className="end-icon"/></button>}
-        </div>
+        {/* Footer — shared */}
+        <footer className="card-footer">
+          <span>Building Intelligent Digital Solutions.</span>
+          <a href={validWebsite || '#'} target="_blank" rel="noreferrer">Codeless Technologies</a>
+        </footer>
 
-        {optionalActions.length > 0 && <div className="more-actions"><p className="section-label">CONNECT & EXPLORE</p>{optionalActions.map(a => <button key={a.key} className="action secondary" onClick={() => openAction(a)}>{actionIcon(a.type)}<span>{a.label}</span><ArrowUpRight className="end-icon"/></button>)}</div>}
-
-        <footer><span>Building Intelligent Digital Solutions.</span><a href={validWebsite || '#'} target="_blank" rel="noreferrer">Codeless Technologies</a></footer>
-      </section>
-      <p className="bottom-note">Digital business card · Codeless Technologies</p>
+      </div>
     </main>
   );
 }
